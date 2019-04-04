@@ -17,6 +17,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/yaml"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -156,6 +157,10 @@ func LoadConfigFromFile(configFile string, cfg *api.ClusterConfig) error {
 	data, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		return errors.Wrapf(err, "reading config file %q", configFile)
+	}
+
+	if err := yaml.UnmarshalStrict(data, &api.ClusterConfig{}); err != nil {
+		return errors.Wrapf(err, "loading config file %q", configFile)
 	}
 
 	obj, err := runtime.Decode(scheme.Codecs.UniversalDeserializer(), data)
